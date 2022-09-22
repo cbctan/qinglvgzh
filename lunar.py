@@ -223,6 +223,6 @@ def test(ct=None):
   print('公历 {} 北京时间 {}'.format(ln.localtime.date(), ln.localtime.time()))
   print('{} 【{}】 {}年 {}日 {}时'.format(ln.ln_date_str(), ln.gz_year(), ln.sx_year(), ln.gz_day(), ln.gz_hour()))
   print('节气：{}'.format(ln.ln_jie()))
-if __name__ == '__main__':
-  ct = datetime.datetime(2015,2,19,13,0,15)
-  test(ct)
+# if __name__ == '__main__':
+#  ct = datetime.datetime(2015,2,19,13,0,15)
+#  test(ct)
