@@ -21,7 +21,7 @@ def get_weather():
   url = "http://autodev.openspeech.cn/csp/api/v2.1/weather?openId=aiuicus&clientType=android&sign=android&city=" + city
   res = requests.get(url).json()
   weather = res['data']['list'][0]
-  return weather['weather'], math.floor(weather['temp']),wind['wind']
+  return weather['weather'], math.floor(weather['temp']),weather['wind']
 
 # 计算开始到现在天数
 def get_count():
