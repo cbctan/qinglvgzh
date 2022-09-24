@@ -34,7 +34,7 @@ def get_access_token():
 def get_weather(region):
     key = config["weather_key"]
     region_url = "https://geoapi.qweather.com/v2/city/lookup?location=乌鲁木齐&key=71e3b8bc36274c2790bed72501883d07"
-    response = requests.get(url).json()
+    response = requests.get(region_url).json()
     if response["code"] == "404":
         print("推送消息失败，请检查地区名是否有误！")
         os.system("pause")
