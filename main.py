@@ -1,6 +1,6 @@
 import random
 from time import localtime
-from requests import get, post
+from requests
 from datetime import datetime, date
 from zhdate import ZhDate
 import sys
@@ -32,13 +32,9 @@ def get_access_token():
 
 
 def get_weather(region):
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
-    }
     key = config["weather_key"]
     region_url = "https://geoapi.qweather.com/v2/city/lookup?location=乌鲁木齐&key=71e3b8bc36274c2790bed72501883d07"
-    response = get(region_url, headers=headers).json()
+    response = requests.get(url).json()
     if response["code"] == "404":
         print("推送消息失败，请检查地区名是否有误！")
         os.system("pause")
@@ -51,7 +47,7 @@ def get_weather(region):
         # 获取地区的location--id
         location_id = response["location"][0]["id"]
     weather_url = "https://devapi.qweather.com/v7/weather/now?location=101130101&key=71e3b8bc36274c2790bed72501883d07"
-    response = get(weather_url, headers=headers).json()
+    response = requests.get(url).json()
     # 天气
     weather = response["now"]["text"]
     # 当前温度
@@ -104,12 +100,7 @@ def get_birthday(birthday, year, today):
 
 def get_ciba():
     url = "http://open.iciba.com/dsapi/"
-    headers = {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
-    }
-    r = get(url, headers=headers)
+    r = requests.get(url)
     note_en = r.json()["content"]
     note_ch = r.json()["note"]
     return note_ch, note_en
