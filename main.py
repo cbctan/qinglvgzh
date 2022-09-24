@@ -13,6 +13,13 @@ def get_random_color():
     # 获取随机颜色
     return "#%06x" % random.randint(0, 0xFFFFFF)
 
+def get_words():
+  words = requests.get("https://api.shadiao.pro/chp")
+  if words.status_code != 200:
+    return get_words()
+  return words.json()['data']['text']
+
+
 def get_weather():
   # 天气
   url = "http://autodev.openspeech.cn/csp/api/v2.1/weather?openId=aiuicus&clientType=android&sign=android&city="+region 
@@ -200,6 +207,6 @@ if __name__ == "__main__":
     app_secret = config["app_secret"]
     client = WeChatClient(app_id, app_secret)
     wm = WeChatMessage(client)    
-    data = {"humidity":{"value":region},"weather":{"value":wea},"temperature":{"value":temperature},"love_days":{"value":get_count()},"birthday_left":{"value":get_birthday()},"words":{"value":get_words(), "color":get_random_color()}}
+    data = {"humidity":{"value":region},"weather":{"value":wea},"temperature":{"value":temp},"love_days":{"value":get_count()},"birthday_left":{"value":get_birthday()},"words":{"value":get_words(), "color":get_random_color()}}
     res = wm.send_template(user_id, template_id, data)
     print(res)
