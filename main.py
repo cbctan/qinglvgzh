@@ -68,7 +68,21 @@ def get_ciba():
     note_ch = r.json()["note"]
     return note_ch, note_en
 
-
+def get_access_token():
+    # appId
+    app_id = config["app_id"]
+    # appSecret
+    app_secret = config["app_secret"]
+    post_url = ("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}"
+                .format(app_id, app_secret))
+    try:
+        access_token = get(post_url).json()['access_token']
+    except KeyError:
+        print("获取access_token失败，请检查app_id和app_secret是否正确")
+        os.system("pause")
+        sys.exit(1)
+    # print(access_token)
+    return access_token
 
 def send_message(to_user, access_token, region_name, weather, temp, wind_dir, note_ch, note_en):
     url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}".format(access_token)
