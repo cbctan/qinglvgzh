@@ -1,6 +1,6 @@
 import random
 from time import localtime
-from requests
+import requests
 from datetime import datetime, date
 from zhdate import ZhDate
 import sys
