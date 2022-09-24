@@ -15,7 +15,7 @@ def get_random_color():
 
 def get_weather():
   # 天气
-  url = "http://autodev.openspeech.cn/csp/api/v2.1/weather?openId=aiuicus&clientType=android&sign=android&city=乌鲁木齐" 
+  url = "http://autodev.openspeech.cn/csp/api/v2.1/weather?openId=aiuicus&clientType=android&sign=android&city="+region 
   res = requests.get(url).json()
   weather = res['data']['list'][0]
   return weather['weather'], math.floor(weather['temp']), weather['wind']
@@ -192,6 +192,11 @@ if __name__ == "__main__":
         # 获取词霸每日金句
         note_ch, note_en = get_ciba()
     # 公众号推送消息
-    for user in users:
-        send_message(user, accessToken, region, wea, temp, wind, note_ch, note_en)
-    os.system("pause")
+    # for user in users:
+    #    send_message(user, accessToken, region, wea, temp, wind, note_ch, note_en)
+    # os.system("pause")
+client = WeChatClient(app_id, app_secret)
+wm = WeChatMessage(client)    
+data = {"humidity":{"value":city},"weather":{"value":wea},"temperature":{"value":temperature},"love_days":{"value":get_count()},"birthday_left":{"value":get_birthday()},"words":{"value":get_words(), "color":get_random_color()}}
+res = wm.send_template(user_id, template_id, data)
+print(res)
