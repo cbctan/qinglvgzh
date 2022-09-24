@@ -3,59 +3,22 @@ from time import localtime
 import requests
 from datetime import datetime, date
 from zhdate import ZhDate
+import math
+from wechatpy import WeChatClient
+from wechatpy.client.api import WeChatMessage, WeChatTemplate
 import sys
 import os
 
-
-def get_color():
+def get_random_color():
     # 获取随机颜色
-    get_colors = lambda n: list(map(lambda i: "#" + "%06x" % random.randint(0, 0xFFFFFF), range(n)))
-    color_list = get_colors(100)
-    return random.choice(color_list)
+    return "#%06x" % random.randint(0, 0xFFFFFF)
 
-
-def get_access_token():
-    # appId
-    app_id = config["app_id"]
-    # appSecret
-    app_secret = config["app_secret"]
-    post_url = ("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}"
-                .format(app_id, app_secret))
-    try:
-        access_token = requests.get(post_url).json()['access_token']
-    except KeyError:
-        print("获取access_token失败，请检查app_id和app_secret是否正确")
-        os.system("pause")
-        sys.exit(1)
-    # print(access_token)
-    return access_token
-
-
-def get_weather(region):
-    key = config["weather_key"]
-    region_url = "https://geoapi.qweather.com/v2/city/lookup?location=乌鲁木齐&key=71e3b8bc36274c2790bed72501883d07"
-    response = requests.get(region_url).json()
-    if response["code"] == "404":
-        print("推送消息失败，请检查地区名是否有误！")
-        os.system("pause")
-        sys.exit(1)
-    # elif response["code"] == "401":
-    #     print("推送消息失败，请检查和风天气key是否正确！")
-    #     os.system("pause")
-    #     sys.exit(1)
-    else:
-        # 获取地区的location--id
-        location_id = response["location"][0]["id"]
-    weather_url = "https://devapi.qweather.com/v7/weather/now?location=101130101&key=71e3b8bc36274c2790bed72501883d07"
-    response = requests.get(url).json()
-    # 天气
-    weather = response["now"]["text"]
-    # 当前温度
-    temp = response["now"]["temp"] + u"\N{DEGREE SIGN}" + "C"
-    # 风向
-    wind_dir = response["now"]["windDir"]
-    return weather, temp, wind_dir
-
+def get_weather():
+  # 天气
+  url = "http://autodev.openspeech.cn/csp/api/v2.1/weather?openId=aiuicus&clientType=android&sign=android&city=乌鲁木齐" 
+  res = requests.get(url).json()
+  weather = res['data']['list'][0]
+  return weather['weather'], math.floor(weather['temp']), wind_dir['wind']
 
 def get_birthday(birthday, year, today):
     birthday_year = birthday.split("-")[0]
@@ -135,35 +98,35 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, no
         "data": {
             "date": {
                 "value": "{} {}".format(today, week),
-                "color": get_color()
+                "color": get_random_color()
             },
             "region": {
                 "value": region_name,
-                "color": get_color()
+                "color": get_random_color()
             },
             "weather": {
                 "value": weather,
-                "color": get_color()
+                "color": get_random_color()
             },
             "temp": {
                 "value": temp,
-                "color": get_color()
+                "color": get_random_color()
             },
             "wind_dir": {
                 "value": wind_dir,
-                "color": get_color()
+                "color": get_random_color()
             },
             "love_day": {
                 "value": love_days,
-                "color": get_color()
+                "color": get_random_color()
             },
             "note_en": {
                 "value": note_en,
-                "color": get_color()
+                "color": get_random_color()
             },
             "note_ch": {
                 "value": note_ch,
-                "color": get_color()
+                "color": get_random_color()
             }
         }
     }
@@ -175,7 +138,7 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, no
         else:
             birthday_data = "距离{}的生日还有{}天".format(value["name"], birth_day)
         # 将生日数据插入data
-        data["data"][key] = {"value": birthday_data, "color": get_color()}
+        data["data"][key] = {"value": birthday_data, "color": get_random_color()}
     response = requests.post(url).json()
     if response["errcode"] == 40037:
         print("推送消息失败，请检查模板id是否正确")
