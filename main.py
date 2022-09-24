@@ -195,8 +195,11 @@ if __name__ == "__main__":
     # for user in users:
     #    send_message(user, accessToken, region, wea, temp, wind, note_ch, note_en)
     # os.system("pause")
-client = WeChatClient(app_id, app_secret)
-wm = WeChatMessage(client)    
-data = {"humidity":{"value":city},"weather":{"value":wea},"temperature":{"value":temperature},"love_days":{"value":get_count()},"birthday_left":{"value":get_birthday()},"words":{"value":get_words(), "color":get_random_color()}}
-res = wm.send_template(user_id, template_id, data)
-print(res)
+    app_id = config["app_id"]
+    # appSecret
+    app_secret = config["app_secret"]
+    client = WeChatClient(app_id, app_secret)
+    wm = WeChatMessage(client)    
+    data = {"humidity":{"value":city},"weather":{"value":wea},"temperature":{"value":temperature},"love_days":{"value":get_count()},"birthday_left":{"value":get_birthday()},"words":{"value":get_words(), "color":get_random_color()}}
+    res = wm.send_template(user_id, template_id, data)
+    print(res)
