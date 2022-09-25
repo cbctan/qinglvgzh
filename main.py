@@ -1,32 +1,73 @@
 import random
 from time import localtime
-import requests
+from requests import get, post
 from datetime import datetime, date
 from zhdate import ZhDate
-import math
-from wechatpy import WeChatClient
-from wechatpy.client.api import WeChatMessage, WeChatTemplate
 import sys
 import os
 
-def get_random_color():
+
+def get_color():
     # 获取随机颜色
-    return "#%06x" % random.randint(0, 0xFFFFFF)
-
-def get_words():
-  words = requests.get("https://api.shadiao.pro/chp")
-  if words.status_code != 200:
-    return get_words()
-  return words.json()['data']['text']
+    get_colors = lambda n: list(map(lambda i: "#" + "%06x" % random.randint(0, 0xFFFFFF), range(n)))
+    color_list = get_colors(100)
+    return random.choice(color_list)
 
 
-def get_weather():
-  # 天气
-  url = "http://autodev.openspeech.cn/csp/api/v2.1/weather?openId=aiuicus&clientType=android&sign=android&city="+region 
+def get_access_token():
+    # appId
+    app_id = config["app_id"]
+    # appSecret
+    app_secret = config["app_secret"]
+    post_url = ("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}"
+                .format(app_id, app_secret))
+    try:
+        access_token = get(post_url).json()['access_token']
+    except KeyError:
+        print("获取access_token失败，请检查app_id和app_secret是否正确")
+        os.system("pause")
+        sys.exit(1)
+    # print(access_token)
+    return access_token
+
+####################################################################################
+
+def get_weather(region):
+  url = "http://autodev.openspeech.cn/csp/api/v2.1/weather?openId=aiuicus&clientType=android&sign=android&city=" + region
   res = requests.get(url).json()
   weather = res['data']['list'][0]
   return weather['weather'], math.floor(weather['temp']), weather['wind']
 
+def get_weather1(region):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+    }
+    key = config["weather_key"]
+    region_url = "https://geoapi.qweather.com/v2/city/lookup?location={}&key={}".format(region, key)
+    response = get(region_url, headers=headers).json()
+    if response["code"] == "404":
+        print("推送消息失败，请检查地区名是否有误！")
+        os.system("pause")
+        sys.exit(1)
+    elif response["code"] == "401":
+        print("推送消息失败，请检查和风天气key是否正确！")
+        os.system("pause")
+        sys.exit(1)
+    else:
+        # 获取地区的location--id
+        location_id = response["location"][0]["id"]
+    weather_url = "https://devapi.qweather.com/v7/weather/now?location={}&key={}".format(location_id, key)
+    response = get(weather_url, headers=headers).json()
+    # 天气
+    weather = response["now"]["text"]
+    # 当前温度
+    temp = response["now"]["temp"] + u"\N{DEGREE SIGN}" + "C"
+    # 风向
+    wind_dir = response["now"]["windDir"]
+    return weather, temp, wind_dir
+
+####################################################################################
 def get_birthday(birthday, year, today):
     birthday_year = birthday.split("-")[0]
     # 判断是否为农历生日
@@ -66,30 +107,30 @@ def get_birthday(birthday, year, today):
         birth_date = year_date
         birth_day = str(birth_date.__sub__(today)).split(" ")[0]
     return birth_day
+    
+    
+####################################################################################
+# 获取每日一句
+def get_words():
+  words = requests.get("https://api.shadiao.pro/chp")
+  if words.status_code != 200:
+    return get_words()
+  return words.json()['data']['text']
 
 
 def get_ciba():
     url = "http://open.iciba.com/dsapi/"
-    r = requests.get(url)
+    headers = {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+    }
+    r = get(url, headers=headers)
     note_en = r.json()["content"]
     note_ch = r.json()["note"]
     return note_ch, note_en
+####################################################################################
 
-def get_access_token():
-    # appId
-    app_id = config["app_id"]
-    # appSecret
-    app_secret = config["app_secret"]
-    post_url = ("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}"
-                .format(app_id, app_secret))
-    try:
-        access_token = requests.get(post_url).json()
-    except KeyError:
-        print("获取access_token失败，请检查app_id和app_secret是否正确")
-        os.system("pause")
-        sys.exit(1)
-    # print(access_token)
-    return access_token
 
 def send_message(to_user, access_token, region_name, weather, temp, wind_dir, note_ch, note_en):
     url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}".format(access_token)
@@ -119,35 +160,39 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, no
         "data": {
             "date": {
                 "value": "{} {}".format(today, week),
-                "color": get_random_color()
+                "color": get_color()
             },
             "region": {
                 "value": region_name,
-                "color": get_random_color()
+                "color": get_color()
             },
             "weather": {
                 "value": weather,
-                "color": get_random_color()
+                "color": get_color()
             },
             "temp": {
                 "value": temp,
-                "color": get_random_color()
+                "color": get_color()
             },
             "wind_dir": {
                 "value": wind_dir,
-                "color": get_random_color()
+                "color": get_color()
             },
             "love_day": {
                 "value": love_days,
-                "color": get_random_color()
+                "color": get_color()
             },
             "note_en": {
                 "value": note_en,
-                "color": get_random_color()
+                "color": get_color()
             },
             "note_ch": {
                 "value": note_ch,
-                "color": get_random_color()
+                "color": get_color()
+            },
+            "words": {
+                "value": get_words(),
+                "color": get_color()
             }
         }
     }
@@ -159,8 +204,13 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, no
         else:
             birthday_data = "距离{}的生日还有{}天".format(value["name"], birth_day)
         # 将生日数据插入data
-        data["data"][key] = {"value": birthday_data, "color": get_random_color()}
-    response = requests.post(url).json()
+        data["data"][key] = {"value": birthday_data, "color": get_color()}
+    headers = {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+    }
+    response = post(url, headers=headers, json=data).json()
     if response["errcode"] == 40037:
         print("推送消息失败，请检查模板id是否正确")
     elif response["errcode"] == 40036:
@@ -192,21 +242,13 @@ if __name__ == "__main__":
     users = config["user"]
     # 传入地区获取天气信息
     region = config["region"]
-    wea, temp, wind = get_weather()
+    weather, temp, wind_dir = get_weather(region)
     note_ch = config["note_ch"]
     note_en = config["note_en"]
     if note_ch == "" and note_en == "":
         # 获取词霸每日金句
         note_ch, note_en = get_ciba()
     # 公众号推送消息
-    # for user in users:
-    #    send_message(user, accessToken, region, wea, temp, wind, note_ch, note_en)
-    # os.system("pause")
-    app_id = config["app_id"]
-    # appSecret
-    app_secret = config["app_secret"]
-    client = WeChatClient(app_id, app_secret)
-    wm = WeChatMessage(client)    
-    data = {"humidity":{"value":region},"weather":{"value":wea},"temperature":{"value":temp},"love_days":{"value":get_count()},"birthday_left":{"value":get_birthday()},"words":{"value":get_words(), "color":get_random_color()}}
-    res = wm.send_template(user_id, template_id, data)
-    print(res)
+    for user in users:
+        send_message(user, accessToken, region, weather, temp, wind_dir, note_ch, note_en)
+    os.system("pause")
