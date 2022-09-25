@@ -9,7 +9,8 @@ import math
 
 def get_ip():
     url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx17f71bf31a0351e1&secret=7f9b8801332697b17d0fb09a9d701496"
-    return requests.get(url).json()
+    res = requests.get(url).json()
+    return res["errmsg"]
 
 def get_color():
     # 获取随机颜色
