@@ -22,7 +22,7 @@ def get_access_token():
     post_url = ("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}"
                 .format(app_id, app_secret))
     try:
-        res = requests.get(url).json()
+        res = requests.get(post_url).json()
         access_token = res['access_token']
     except KeyError:
         print("获取access_token失败，请检查app_id和app_secret是否正确")
