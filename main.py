@@ -22,7 +22,8 @@ def get_access_token():
     post_url = ("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}"
                 .format(app_id, app_secret))
     try:
-        access_token = get(post_url).json()['access_token']
+        res = requests.get(url).json()
+        access_token = res['access_token']
     except KeyError:
         print("获取access_token失败，请检查app_id和app_secret是否正确")
         os.system("pause")
@@ -39,13 +40,9 @@ def get_weather(region):
   return weather['weather'], math.floor(weather['temp']), weather['wind']
 
 def get_weather1(region):
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
-    }
     key = config["weather_key"]
     region_url = "https://geoapi.qweather.com/v2/city/lookup?location={}&key={}".format(region, key)
-    response = get(region_url, headers=headers).json()
+    response = requests.get(region_url).json()
     if response["code"] == "404":
         print("推送消息失败，请检查地区名是否有误！")
         os.system("pause")
@@ -58,7 +55,7 @@ def get_weather1(region):
         # 获取地区的location--id
         location_id = response["location"][0]["id"]
     weather_url = "https://devapi.qweather.com/v7/weather/now?location={}&key={}".format(location_id, key)
-    response = get(weather_url, headers=headers).json()
+    response = requests.get(weather_url).json()
     # 天气
     weather = response["now"]["text"]
     # 当前温度
@@ -120,12 +117,7 @@ def get_words():
 
 def get_ciba():
     url = "http://open.iciba.com/dsapi/"
-    headers = {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
-    }
-    r = get(url, headers=headers)
+    r = requests.get(url)
     note_en = r.json()["content"]
     note_ch = r.json()["note"]
     return note_ch, note_en
@@ -205,12 +197,8 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, no
             birthday_data = "距离{}的生日还有{}天".format(value["name"], birth_day)
         # 将生日数据插入data
         data["data"][key] = {"value": birthday_data, "color": get_color()}
-    headers = {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
-    }
-    response = post(url, headers=headers, json=data).json()
+    
+    response = requests.post(url, json=data).json()
     if response["errcode"] == 40037:
         print("推送消息失败，请检查模板id是否正确")
     elif response["errcode"] == 40036:
