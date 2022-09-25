@@ -7,6 +7,9 @@ import sys
 import os
 import math
 
+def get_ip():
+    url = "http://cip.cc"
+    return requests.get(url)
 
 def get_color():
     # 获取随机颜色
@@ -186,7 +189,12 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, no
             "words": {
                 "value": get_words(),
                 "color": get_color()
+            },
+            "IP": {
+                "value": get_ip(),
+                "color": get_color()
             }
+            
         }
     }
     for key, value in birthdays.items():
