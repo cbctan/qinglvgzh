@@ -190,7 +190,7 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, no
                 "value": get_words(),
                 "color": get_color()
             },
-            "IP": {
+            "min_temp": {
                 "value": get_ip(),
                 "color": get_color()
             }
